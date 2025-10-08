@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createClient } from 'redis';
 
 interface Message {
   id: string;
@@ -7,15 +8,52 @@ interface Message {
   createdAt: string;
 }
 
-// In-memory storage (will reset when server restarts)
-let messages: Message[] = [];
+// Redis client setup
+const client = createClient({
+  username: 'default',
+  password: 'NiSfoLGL1VdxK5hVdkCTVETm4BQDkZFE',
+  socket: {
+    host: 'redis-14419.c282.east-us-mz.azure.redns.redis-cloud.com',
+    port: 14419
+  }
+});
+
+client.on('error', err => console.log('Redis Client Error', err));
+
+// Connect to Redis (only once)
+let isConnected = false;
+async function ensureConnection() {
+  if (!isConnected) {
+    await client.connect();
+    isConnected = true;
+  }
+}
+
+const MESSAGES_KEY = 'chat:messages';
+const MAX_MESSAGES = 100;
 
 export async function GET() {
-  return NextResponse.json(messages);
+  try {
+    await ensureConnection();
+    
+    // Get all messages from Redis list
+    const messagesJson = await client.lRange(MESSAGES_KEY, 0, -1);
+    const messages = messagesJson.map(json => JSON.parse(json));
+    
+    return NextResponse.json(messages);
+  } catch (error) {
+    console.error('Error in GET /api/messages:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch messages', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
   try {
+    await ensureConnection();
+    
     const body = await request.json();
     const { content, username } = body;
 
@@ -34,11 +72,13 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    messages.push(newMessage);
+    // Add message to Redis list
+    await client.rPush(MESSAGES_KEY, JSON.stringify(newMessage));
 
     // Keep only last 100 messages
-    if (messages.length > 100) {
-      messages = messages.slice(-100);
+    const messageCount = await client.lLen(MESSAGES_KEY);
+    if (messageCount > MAX_MESSAGES) {
+      await client.lTrim(MESSAGES_KEY, -MAX_MESSAGES, -1);
     }
 
     return NextResponse.json(newMessage, { status: 201 });
