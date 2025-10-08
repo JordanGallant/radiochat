@@ -1,24 +1,23 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
 
 interface Message {
   id: string;
   content: string;
   username: string;
-  userId: string;
   createdAt: string;
 }
 
-export default function ChatWithAuth() {
-  const { isLoaded, isSignedIn, user } = useUser();
+export default function SimpleChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSetUsername, setHasSetUsername] = useState(false);
 
   // Load messages on mount and poll for updates
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!hasSetUsername) return;
 
     loadMessages();
     
@@ -26,7 +25,7 @@ export default function ChatWithAuth() {
     const interval = setInterval(loadMessages, 2000);
 
     return () => clearInterval(interval);
-  }, [isSignedIn]);
+  }, [hasSetUsername]);
 
   const loadMessages = async () => {
     try {
@@ -41,7 +40,7 @@ export default function ChatWithAuth() {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user || isLoading) return;
+    if (!newMessage.trim() || !username || isLoading) return;
 
     setIsLoading(true);
     try {
@@ -50,8 +49,7 @@ export default function ChatWithAuth() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: newMessage,
-          username: user.fullName || user.username || user.primaryEmailAddress?.emailAddress || 'Anonymous',
-          userId: user.id,
+          username: username,
         }),
       });
 
@@ -66,38 +64,50 @@ export default function ChatWithAuth() {
     }
   };
 
-  // Loading state
-  if (!isLoaded) {
-    return (
-      <div className="max-w-sm mx-auto mt-10 text-center text-white">
-        <p>Loading...</p>
-      </div>
-    );
-  }
+  const handleSetUsername = () => {
+    if (username.trim()) {
+      setHasSetUsername(true);
+    }
+  };
 
-  // Not signed in - show sign in button
-  if (!isSignedIn) {
+  // Username setup screen
+  if (!hasSetUsername) {
     return (
       <div className="max-w-sm mx-auto mt-10 text-center">
         <div className="border border-gray-700 rounded-2xl p-8 bg-gray-900">
           <h2 className="text-2xl font-bold text-white mb-4">🎧 Live Radio Chat</h2>
-          <p className="text-gray-400 mb-6">Sign in to join the conversation</p>
-          <SignInButton mode="modal">
-            <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
-              Sign In
-            </button>
-          </SignInButton>
+          <p className="text-gray-400 mb-6">Enter your username to join</p>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSetUsername()}
+            placeholder="Your username..."
+            className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 mb-4"
+          />
+          <button
+            onClick={handleSetUsername}
+            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50"
+            disabled={!username.trim()}
+          >
+            Join Chat
+          </button>
         </div>
       </div>
     );
   }
 
-  // Signed in - show chat
+  // Chat screen
   return (
     <div className="max-w-md mx-auto mt-10 border border-gray-700 rounded-2xl p-4 bg-gray-900 text-white">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">🎧 Live Radio Chat</h2>
-        <UserButton afterSignOutUrl="/" />
+        <button
+          onClick={() => setHasSetUsername(false)}
+          className="text-sm text-gray-400 hover:text-white"
+        >
+          Change Username
+        </button>
       </div>
 
       <div className="h-64 overflow-y-auto border border-gray-800 rounded-lg p-3 bg-gray-950">
@@ -105,9 +115,14 @@ export default function ChatWithAuth() {
           <p className="text-gray-500 text-center mt-20">No messages yet. Be the first to chat!</p>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className="mb-2">
-              <span className="font-semibold text-blue-400">{msg.username}: </span>
-              <span>{msg.content}</span>
+            <div key={msg.id} className="mb-3">
+              <div className="flex items-baseline gap-2">
+                <span className="font-semibold text-blue-400">{msg.username}</span>
+                <span className="text-xs text-gray-500">
+                  {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+              <span className="text-gray-200">{msg.content}</span>
             </div>
           ))
         )}

@@ -1,11 +1,9 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 interface Message {
   id: string;
   content: string;
   username: string;
-  userId: string;
   createdAt: string;
 }
 
@@ -18,14 +16,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // Get auth from Clerk
-    const authResult = await auth();
-    const userId = authResult?.userId;
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
     const { content, username } = body;
 
@@ -33,11 +23,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Content required' }, { status: 400 });
     }
 
+    if (!username || !username.trim()) {
+      return NextResponse.json({ error: 'Username required' }, { status: 400 });
+    }
+
     const newMessage: Message = {
       id: Date.now().toString(),
       content: content.trim(),
-      username: username || 'Anonymous',
-      userId,
+      username: username.trim(),
       createdAt: new Date().toISOString(),
     };
 
