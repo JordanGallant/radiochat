@@ -99,7 +99,7 @@ export default function SimpleChat() {
 
   // Chat screen
   return (
-    <div className="max-w-md mx-auto mt-10 border border-gray-700 rounded-2xl p-4 bg-gray-900 text-white">
+    <div className="max-w-md mx-auto mt-10 border border-gray-700 rounded-2xl p-4 bg-transparent text-white">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">🎧 Live Radio Chat</h2>
         <button
