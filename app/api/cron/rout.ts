@@ -2,9 +2,9 @@ import Redis from 'ioredis';
 import { NextRequest, NextResponse } from 'next/server';
 
 const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
-  password: process.env.REDIS_PASSWORD,
+  host: "redis-14419.c282.east-us-mz.azure.redns.redis-cloud.com",
+  port: 14419,
+  password: "NiSfoLGL1VdxK5hVdkCTVETm4BQDkZFE",
 });
 
 export async function GET(request: NextRequest) {
