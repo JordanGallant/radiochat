@@ -99,7 +99,8 @@ export default function SimpleChat() {
 
   // Chat screen - Full height
   return (
-    <div className="h-screen flex flex-col max-w-md mx-auto border-x border-gray-700 bg-transparent text-white">
+    <div className="h-screen flex flex-col max-w-md mx-auto bg-transparent text-white py-30">
+      <div className="flex flex-col h-full border border-gray-700 rounded-2xl overflow-hidden">
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-lg font-bold">🎧 Live Radio Chat</h2>
         <button
@@ -145,6 +146,7 @@ export default function SimpleChat() {
         >
           {isLoading ? '...' : 'Send'}
         </button>
+      </div>
       </div>
     </div>
   );
