@@ -97,10 +97,10 @@ export default function SimpleChat() {
     );
   }
 
-  // Chat screen
+  // Chat screen - Full height
   return (
-    <div className="max-w-md mx-auto mt-10 border border-gray-700 rounded-2xl p-4 bg-transparent text-white">
-      <div className="flex justify-between items-center mb-4">
+    <div className="h-screen flex flex-col max-w-md mx-auto border-x border-gray-700 bg-transparent text-white">
+      <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <h2 className="text-lg font-bold">🎧 Live Radio Chat</h2>
         <button
           onClick={() => setHasSetUsername(false)}
@@ -110,7 +110,7 @@ export default function SimpleChat() {
         </button>
       </div>
 
-      <div className="h-64 overflow-y-auto border border-gray-800 rounded-lg p-3 bg-gray-950">
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-950">
         {messages.length === 0 ? (
           <p className="text-gray-500 text-center mt-20">No messages yet. Be the first to chat!</p>
         ) : (
@@ -128,7 +128,7 @@ export default function SimpleChat() {
         )}
       </div>
 
-      <div className="flex gap-2 mt-3">
+      <div className="flex gap-2 p-4 border-t border-gray-700 bg-gray-900">
         <input
           type="text"
           value={newMessage}
