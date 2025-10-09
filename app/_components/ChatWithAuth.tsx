@@ -73,7 +73,7 @@ export default function SimpleChat() {
   // Username setup screen
   if (!hasSetUsername) {
     return (
-      <div className="max-w-sm mx-auto mt-10 text-center">
+      <div className="max-w-sm mx-auto mt-40 text-center">
         <div className="border border-gray-700 rounded-2xl p-8 bg-gray-900">
           <h2 className="text-2xl font-bold text-white mb-4">🎧 Live Radio Chat</h2>
           <p className="text-gray-400 mb-6">Enter your username to join</p>
@@ -101,7 +101,7 @@ export default function SimpleChat() {
   return (
     <div className="h-screen flex flex-col max-w-md mx-auto bg-transparent text-white py-30">
       <div className="flex flex-col h-full border border-gray-700 rounded-2xl overflow-hidden">
-      <div className="flex justify-between items-center p-4 border-b border-gray-700">
+      <div className="flex justify-between items-center p-4 border-b border-gray-700 bg-gray-950">
         <h2 className="text-lg font-bold">🎧 Live Radio Chat</h2>
         <button
           onClick={() => setHasSetUsername(false)}
